@@ -115,7 +115,7 @@ function App() {
               onSubmit={handleAddProduct}
               className="bg-white p-6 rounded-xl shadow mb-6 space-y-4"
             >
-              <input
+               <input
                 className="w-full border p-2 rounded"
                 placeholder="Product name"
                 value={newProduct.name}

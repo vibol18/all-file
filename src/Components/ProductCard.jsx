@@ -25,7 +25,6 @@ const ProductCard = ( { product, onDelete } ) => {
           alt={name}
           className="w-full h-full object-cover"
         />
-
         {stock < 5 && (
           <span className="absolute top-2 right-2 bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-full">
             Low Stock
@@ -46,7 +45,6 @@ const ProductCard = ( { product, onDelete } ) => {
            <button onClick={()=> onDelete(product.id)} className="p-2 bg-indigo-50 rounded-xl">
            <Plus size={18} />
           </button>
-
             <button className="p-2 bg-indigo-50 rounded-xl">
               <Edit size={18} />
             </button>

@@ -1,61 +1,49 @@
-import React, { useState } from 'react';
-import { LayoutDashboard, Users, Package, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  Package,
+  ShoppingCart,
+  BarChart,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const Sidebar = ({ isExpanded, setIsExpanded }) => {
-  const [openSubmenu, setOpenSubmenu] = useState("Products");
+  const [openSubmenu, setOpenSubmenu] = useState("");
 
-  const menuItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, active: true },
-    { name: 'User Management', icon: <Users size={20} />, hasSubmenu: true },
-    {
-      name: 'Products',
-      icon: <Package size={20} />,
-      hasSubmenu: true,
-      subItems: ['List Products', 'Add Product', 'Variations', 'Selling Price Group']
-    },
-  ];
   return (
-    <div className={`h-screen bg-white border-r transition-all duration-300 relative ${isExpanded ? 'w-64' : 'w-20'}`}>
-      <button 
+    <div className={`h-screen bg-white border-r transition-all duration-300 ${isExpanded ? "w-64" : "w-20"}`}>
+      <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute -right-3 top-10 bg-white border rounded-full p-1 shadow-md z-10"
+        className="absolute -right-3 top-10 bg-white border rounded-full p-1 shadow"
       >
         {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
       </button>
-      
-      <div className="p-4 flex items-center gap-2">
-        <div className="bg-yellow-400 font-bold p-1 rounded">SADA</div>
-        {isExpanded && <span className="text-xs font-bold text-gray-500">SUPER SHOP</span>}
-      </div>
 
-      <nav className="mt-4 px-3">
-        {menuItems.map((item) => (
-          <div key={item.name} className="mb-2">
-            <div
-              onClick={() => isExpanded && item.hasSubmenu && setOpenSubmenu(openSubmenu === item.name ? "" : item.name)}
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${item.active ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-            >
-              {item.icon}
-              {isExpanded && (
-                <div className="flex justify-between items-center w-full ml-3">
-                  <span className="text-sm font-medium">{item.name}</span>
-                  {item.hasSubmenu && <ChevronDown size={14} className={openSubmenu === item.name ? "rotate-180" : ""} />}
-                </div>
-              )}
-            </div>
+      <nav className="mt-6 px-3 space-y-2">
+        <Link to="/" className="flex items-center gap-3 p-3 rounded hover:bg-gray-100">
+          <LayoutDashboard size={20} />
+          {isExpanded && <span>Dashboard</span>}
+        </Link>
 
-            {/* Submenu (Render only when Expanded) */}
-            {isExpanded && item.hasSubmenu && openSubmenu === item.name && (
-              <div className="ml-8 mt-1 border-l-2 border-gray-100 pl-4">
-                {item.subItems?.map(sub => (
-                  <div key={sub} className="py-2 text-sm text-gray-500 hover:text-indigo-600 cursor-pointer">
-                    {sub}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+        <Link to="/products" className="flex items-center gap-3 p-3 rounded hover:bg-gray-100">
+          <Package size={20} />
+          {isExpanded && <span>Products</span>}
+        </Link>
+
+        <Link to="/pos" className="flex items-center gap-3 p-3 rounded hover:bg-gray-100">
+          <ShoppingCart size={20} />
+          {isExpanded && <span>POS</span>}
+        </Link>
+
+         <Link to="/Analytics" className="flex items-center gap-3 p-3 rounded hover:bg-gray-100">
+          <BarChart size={20} />
+          {isExpanded && <span>Analytics</span>}
+        </Link>
+
       </nav>
     </div>
   );

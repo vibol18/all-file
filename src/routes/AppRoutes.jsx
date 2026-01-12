@@ -1,19 +1,23 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from '../pages/Dashboard';
-import Login from '../pages/Login';
-import Product from '../pages/Product';
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "../layouts/MainLayout";
+import Dashboard from "../pages/Dashboard";
+import Product from "../pages/Product";
+import Analytics from "../pages/Analytics";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import Pos from "../pages/Pos";
 
-function AppRoutes() {
+export default function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/product" element={<Product />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+       <Route path="/" element={<Register />} />
+      <Route path="/Login" element={<Login />} />
+      <Route element={<MainLayout />}>
+        <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/products" element={<Product />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/pos" element={<Pos/>}/>
+      </Route>
+    </Routes>
   );
 }
-
-export default AppRoutes;
