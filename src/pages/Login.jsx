@@ -13,7 +13,6 @@ function Login() {
       alert('Please enter username and password');
     }
   };
-
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-gray-200 w-[450px] p-8 shadow-sm rounded-lg">

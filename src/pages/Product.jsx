@@ -122,8 +122,7 @@ export default function Product() {
 
       {showForm && (
         <form onSubmit={handleSave} className="bg-white p-6 rounded shadow-md max-w-md mb-6">
-          <h2 className="text-xl font-bold mb-4">{editingId ? "Edit Product" : "Add Product"}</h2>
-
+          <h2 className="text-xl font-bold fixed mb-4">{editingId ? "Edit Product" : "Add Product"}</h2>
           <input
             placeholder="Name"
             value={formData.name}
@@ -147,18 +146,14 @@ export default function Product() {
             onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
             className="border p-2 w-full mb-2"
           />
-
           <textarea
             placeholder="Description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="border p-2 w-full mb-2"
           />
-
           <input type="file" accept="image/*" onChange={handleFileChange} className="border p-2 w-full mb-2" />
-
           {preview && <img src={preview} alt="Preview" className="w-32 h-32 object-cover rounded mb-2" />}
-
           <button type="submit" className="bg-green-600 text-white p-2 w-full rounded">
             {editingId ? "Update Product" : "Add Product"}
           </button>
