@@ -1,108 +1,173 @@
 import React, { useEffect, useState } from "react";
-import { Users, DollarSign } from "lucide-react";
-import { getProducts } from "../utils/api"; // assuming this is a function that fetches products
 
-const Dashboard = () => {
-  const [stats, setStats] = useState({
-    stock: 0,
-    users: 0,
-    revenue: 0,
-  });
+export default function Dashboard() {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true); // for dashboard stats
-  const [productLoading, setProductLoading] = useState(true); // for products
-  const [error, setError] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
-  // Fetch dashboard stats (simulated)
+  // 🔹 Fetch products from your API
+  const fetchProducts = async () => {
+    setLoadingProducts(true);
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/products");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      const data = await res.json();
+      setProducts(data.data || data); // depends on your API response
+    } catch (err) {
+      setError("Cannot load products");
+      console.error(err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  // 🔹 Fetch orders from your API
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/orders");
+      if (!res.ok) throw new Error("Failed to fetch orders");
+      const data = await res.json();
+      setOrders(data.data || data);
+    } catch (err) {
+      setError("Cannot load orders");
+      console.error(err);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
   useEffect(() => {
-    setTimeout(() => {
-      setStats({
-        stock: 128,
-        users: 12,
-        revenue: 4580,
-      });
-      setLoading(false);
-    }, 600);
-  }, []);
-
-  // Fetch products from API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await getProducts(); // your custom API call
-        setProducts(data);
-      } catch (err) {
-        setError(err.message || "Failed to fetch products");
-      } finally {
-        setProductLoading(false);
-      }
-    };
-
     fetchProducts();
+    fetchOrders();
   }, []);
 
-  if (loading || productLoading) {
-    return <p className="text-gray-500">Loading dashboard...</p>;
-  }
+  // 🔹 Summary calculations
+  const totalRevenue = orders.reduce((sum, o) => sum + parseFloat(o.total || o.total_amount || 0), 0);
+  const totalOrders = orders.length;
+  const totalProducts = products.length;
+  const lowStock = products.filter((p) => parseInt(p.stock) <= 2);
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
+  // 🔹 Filter orders by customer name
+  const filteredOrders = orders.filter(
+    (o) => o.customer?.toLowerCase().includes(search.toLowerCase()) || o.name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-gray-500">Overview of your shop performance</p>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white shadow p-4 rounded">
+          <p className="text-gray-500 text-sm">Total Revenue</p>
+          <p className="text-xl font-bold">${totalRevenue.toFixed(2)}</p>
+        </div>
+        <div className="bg-white shadow p-4 rounded">
+          <p className="text-gray-500 text-sm">Total Orders</p>
+          <p className="text-xl font-bold">{totalOrders}</p>
+        </div>
+        <div className="bg-white shadow p-4 rounded">
+          <p className="text-gray-500 text-sm">Total Products</p>
+          <p className="text-xl font-bold">{totalProducts}</p>
+        </div>
+        <div className="bg-white shadow p-4 rounded">
+          <p className="text-gray-500 text-sm">Low Stock</p>
+          <p className="text-xl font-bold">{lowStock.length}</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard
-          title="Stock"
-          value={stats.stock}
-          icon={<DollarSign size={22} />}
-          color="bg-indigo-100 text-indigo-600"
-        />
-        <StatCard
-          title="Users"
-          value={stats.users}
-          icon={<Users size={22} />}
-          color="bg-blue-100 text-blue-600"
-        />
-        <StatCard
-          title="Revenue"
-          value={`$${stats.revenue.toLocaleString()}`}
-          icon={<DollarSign size={22} />}
-          color="bg-yellow-100 text-yellow-600"
-        />
+      {/* Quick Actions */}
+      <div className="mb-6 flex gap-2">
+        <button className="bg-green-600 text-white px-4 py-2 rounded">Add Product</button>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded">Go to POS</button>
+        <button className="bg-yellow-500 text-white px-4 py-2 rounded">View Analytics</button>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-bold">Products</h2>
-        <ul>
-          {products.map((item) => (
-            <li key={item.id}>
-              {item.name} - ${item.price}
-            </li>
-          ))}
-        </ul>
+      {/* Search Orders */}
+      <input
+        type="text"
+        placeholder="Search customer..."
+        className="w-full mb-4 p-2 border rounded"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {/* Recent Orders Table */}
+      <div className="mb-6 overflow-x-auto bg-white shadow rounded">
+        <table className="min-w-full">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border">Order ID</th>
+              <th className="p-2 border">Customer</th>
+              <th className="p-2 border">Total</th>
+              <th className="p-2 border">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loadingOrders ? (
+              <tr>
+                <td colSpan={4} className="p-4 text-center text-gray-500">Loading orders...</td>
+              </tr>
+            ) : filteredOrders.length > 0 ? (
+              filteredOrders.map((o) => (
+                <tr key={o.id}>
+                  <td className="p-2 border">{o.id}</td>
+                  <td className="p-2 border">{o.customer || o.name}</td>
+                  <td className="p-2 border">${parseFloat(o.total || o.total_amount).toFixed(2)}</td>
+                  <td className="p-2 border">{o.status || "Pending"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center p-4 text-gray-500">
+                  No orders found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Low Stock Products */}
+      <div className="overflow-x-auto bg-white shadow rounded">
+        <p className="p-2 font-bold border-b">Low Stock Products</p>
+        <table className="min-w-full">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border">ID</th>
+              <th className="p-2 border">Product</th>
+              <th className="p-2 border">Stock</th>
+              <th className="p-2 border">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loadingProducts ? (
+              <tr>
+                <td colSpan={4} className="p-4 text-center text-gray-500">Loading products...</td>
+              </tr>
+            ) : lowStock.length > 0 ? (
+              lowStock.map((p) => (
+                <tr key={p.id}>
+                  <td className="p-2 border">{p.id}</td>
+                  <td className="p-2 border">{p.name}</td>
+                  <td className="p-2 border">{p.stock}</td>
+                  <td className="p-2 border">${parseFloat(p.price).toFixed(2)}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center p-4 text-gray-500">
+                  No low stock products
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-};
-
-const StatCard = ({ title, value, icon, color }) => {
-  return (
-    <div className="bg-white rounded-xl shadow p-5 flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-500">{title}</p>
-        <h2 className="text-2xl font-bold">{value}</h2>
-      </div>
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color}`}>
-        {icon}
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;
+}

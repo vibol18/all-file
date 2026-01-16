@@ -1,76 +1,52 @@
 import { createContext, useContext, useState } from "react";
 
-export const CartContext = createContext();
+const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
+export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
-  // ✅ Add product to cart (increase qty if exists)
   const addToCart = (product) => {
-    setCart((prev) => {
-      const exist = prev.find((item) => item.id === product.id);
-
-      if (exist) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        );
-      }
-
-      return [...prev, { ...product, qty: 1 }];
-    });
+    const exist = cart.find((item) => item.id === product.id);
+    if (exist) {
+      setCart(
+        cart.map((item) =>
+          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
+        )
+      );
+    } else {
+      setCart([...cart, { ...product, qty: 1 }]);
+    }
   };
 
-  // ✅ Remove item completely
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // ✅ Increase quantity
   const increaseQty = (id) => {
-    setCart((prev) =>
-      prev.map((item) =>
+    setCart(
+      cart.map((item) =>
         item.id === id ? { ...item, qty: item.qty + 1 } : item
       )
     );
   };
 
-  // ✅ Decrease quantity (minimum 1)
   const decreaseQty = (id) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id && item.qty > 1
-          ? { ...item, qty: item.qty - 1 }
-          : item
-      )
+    setCart(
+      cart
+        .map((item) =>
+          item.id === id ? { ...item, qty: item.qty - 1 } : item
+        )
+        .filter((item) => item.qty > 0)
     );
   };
 
-  // ✅ Clear entire cart
-  const clearCart = () => setCart([]);
-
-  // ✅ Calculate total amount
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax;
 
   return (
     <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        increaseQty,
-        decreaseQty,
-        clearCart,
-        totalAmount,
-      }}
+      value={{ cart, addToCart, increaseQty, decreaseQty, subtotal, tax, total }}
     >
       {children}
     </CartContext.Provider>
   );
-};
+}
 
 export const useCart = () => useContext(CartContext);

@@ -10,9 +10,9 @@ import Pos from "../pages/Pos";
 export default function AppRoutes() {
   return (
     <Routes>
+      <Route element={<MainLayout />}>
        <Route path="/" element={<Register />} />
       <Route path="/Login" element={<Login />} />
-      <Route element={<MainLayout />}>
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/products" element={<Product />} />
         <Route path="/analytics" element={<Analytics />} />
